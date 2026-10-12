@@ -31,6 +31,15 @@ find_library(DXC_LIBRARY
     REQUIRED
 )
 
+find_file(DXC_DLL
+    NAMES dxcompiler.dll
+    PATHS "$ENV{VULKAN_SDK}/Bin"
+    NO_DEFAULT_PATH
+    REQUIRED
+)
+
+message(STATUS "DXC_DLL = ${DXC_DLL}")
+
 
 if(NOT DXC_INCLUDE_DIR OR NOT DXC_LIBRARY)
     message(FATAL_ERROR "DXC compiler SDK not found")

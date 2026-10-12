@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(FetchContent)
+include(GoogleTest)
 
 FetchContent_Declare(
     googletest
@@ -40,8 +41,22 @@ target_link_libraries(
 )
 
 include(GoogleTest)
-gtest_discover_tests(${PROJECT_NAME})
+gtest_discover_tests(
+    ${PROJECT_NAME}
+    DISCOVERY_MODE PRE_TEST
+)
 
+if(WIN32)
+message(STATUS "Copying DXC DLL")
+    add_custom_command(
+        TARGET UnitTest
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${DXC_DLL}"
+            "$<TARGET_FILE_DIR:UnitTest>"
+        VERBATIM
+    )
+endif()
 
 
 
