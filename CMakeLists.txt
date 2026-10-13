@@ -14,4 +14,6 @@ set(SPIRV_CROSS_ENABLE_MSL ON CACHE BOOL "" FORCE)
 add_subdirectory(ThirdParty/SPIRV-Cross)
 
 add_subdirectory(Sources)
-add_subdirectory(UnitTest)
+if (${TITANIUM_SHADER_COMPILER_BUILD_TEST})
+	add_subdirectory(UnitTest)
+endif()
