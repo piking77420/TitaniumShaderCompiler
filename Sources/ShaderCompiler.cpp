@@ -122,6 +122,8 @@ namespace Ti::ShaderCompiler
             return true;
         case Spirv:
             args.emplace_back(L"-spirv");
+            if (shaderStage == Compiler::ShaderStage::Vertex || shaderStage == Compiler::ShaderStage::Mesh)
+                args.emplace_back(L"-fvk-invert-y");
             args.emplace_back(L"-fspv-target-env=vulkan1.3");
             if (shaderStage == Compiler::ShaderStage::Mesh || shaderStage == Compiler::ShaderStage::Amplification)
             {
