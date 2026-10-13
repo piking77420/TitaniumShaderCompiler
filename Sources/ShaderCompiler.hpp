@@ -31,6 +31,7 @@ namespace Ti::ShaderCompiler
             InvalidShaderStage,
             InvalidApi,
             ShaderCompilationFailed,
+            FailedCrossCompileToMSL,
             UnexpectedError
         };
 

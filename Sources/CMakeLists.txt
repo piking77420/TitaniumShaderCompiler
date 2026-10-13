@@ -14,7 +14,9 @@ target_include_directories(TitaniumShaderCompiler
         "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-# Find DXC
+find_package(Vulkan REQUIRED)
+
+# DXC
 find_path(DXC_INCLUDE_DIR
     NAMES dxc/dxcapi.h
     HINTS
@@ -45,6 +47,8 @@ if(NOT DXC_INCLUDE_DIR OR NOT DXC_LIBRARY)
     message(FATAL_ERROR "DXC compiler SDK not found")
 endif()
 
+## Spriv Cross
+
 target_include_directories(TitaniumShaderCompiler
     PRIVATE
         "${DXC_INCLUDE_DIR}"
@@ -53,4 +57,8 @@ target_include_directories(TitaniumShaderCompiler
 target_link_libraries(TitaniumShaderCompiler
     PRIVATE
         "${DXC_LIBRARY}"
+        spirv-cross-core
+        spirv-cross-glsl
+        spirv-cross-hlsl
+        spirv-cross-msl
 )

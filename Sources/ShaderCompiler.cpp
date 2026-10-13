@@ -19,6 +19,9 @@ using ComPtr = CComPtr<T>;
 #endif
 #include <dxc/dxcapi.h>
 
+#include <spirv_cross.hpp>
+#include <spirv_msl.hpp>
+
 namespace Ti::ShaderCompiler
 {
     using namespace std::literals;
@@ -127,7 +130,7 @@ namespace Ti::ShaderCompiler
             return true;
 
         case Msl:
-            // TODO add -spirv and thenuse sprive cross to spriv -> MSL
+            args.emplace_back(L"-spirv");
             return true;
         }
 
@@ -170,6 +173,9 @@ namespace Ti::ShaderCompiler
         args.emplace_back(getMatrixConvention(getCodeInfo.matrixConvention).data());
         for (const auto& shaderEntryPoint : getCodeInfo.entryPoints)
         {
+            if (shaderEntryPoint.stage == ShaderStage::Geometry && getCodeInfo.apiTarget == ApiTarget::Msl)
+                return std::unexpected(GetCodeError::UnexpectedError); // there is no geometry stage in metal 
+
             args.resize(1);
             // EntryPoint
             {
@@ -230,7 +236,24 @@ namespace Ti::ShaderCompiler
                 {
                     return std::unexpected(GetCodeError::ShaderCompilationFailed);
                 }
-                entryPointsCodes.emplace_back(dataPtr, dataPtr + dataSize);
+                if (getCodeInfo.apiTarget == ApiTarget::Msl)
+                {
+                    // convert spirv to msl
+                    spirv_cross::CompilerMSL glsl(
+                        std::vector<uint32_t>{reinterpret_cast<const std::uint32_t*>(dataPtr),
+                                              reinterpret_cast<const std::uint32_t*>(dataPtr + dataSize)});
+                    const std::string codeMsl = glsl.compile();
+                    if (codeMsl.empty())
+                        return std::unexpected(GetCodeError::FailedCrossCompileToMSL);
+
+                    entryPointsCodes.emplace_back(reinterpret_cast<const std::byte*>(codeMsl.data()),
+                                                  reinterpret_cast<const std::byte*>(codeMsl.data() + codeMsl.size()));
+                }
+                else
+                {
+                    entryPointsCodes.emplace_back(dataPtr, dataPtr + dataSize);
+                }
+                
             }
             else
             {
