@@ -7,7 +7,7 @@
 #include <Windows.h>
 #include <wrl/client.h>
 #else
-#include <dxc/Support/WinAdapter.h>
+#include <dxc/WinAdapter.h>
 #endif
 
 #ifdef _WIN32
@@ -24,6 +24,26 @@ using ComPtr = CComPtr<T>;
 
 namespace Ti::ShaderCompiler
 {
+    template<typename T>
+    T* getComPtr(const ComPtr<T>& ptr) 
+    {
+    #ifdef _WIN32
+        return ptr.Get();
+    #else
+        return ptr.p;     // for WinAdapter
+    #endif
+    }
+
+    template<typename T>
+    T** getComPtrAddress(ComPtr<T>& ptr)
+    {
+    #ifdef _WIN32
+        return ptr.GetAddressOf();
+    #else
+        return &ptr;     // for WinAdapter
+    #endif
+    }
+
     using namespace std::literals;
 
     struct DXCContext
@@ -41,7 +61,7 @@ namespace Ti::ShaderCompiler
 
         if (!context.compiler)
         {
-            hres = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(context.compiler.GetAddressOf()));
+            hres = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(getComPtrAddress(context.compiler)));
             if (FAILED(hres))
             {
                 exit(-1);
@@ -50,7 +70,7 @@ namespace Ti::ShaderCompiler
 
         if (!context.utils)
         {
-            hres = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(context.utils.GetAddressOf()));
+            hres = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(getComPtrAddress(context.utils)));
             if (FAILED(hres))
             {
                 exit(-1);
@@ -58,7 +78,7 @@ namespace Ti::ShaderCompiler
         }
         if (!context.includeHandler)
         {
-            hres = context.utils->CreateDefaultIncludeHandler(context.includeHandler.GetAddressOf());
+            hres = context.utils->CreateDefaultIncludeHandler(getComPtrAddress(context.includeHandler));
 
             if (FAILED(hres))
             {
@@ -212,7 +232,7 @@ namespace Ti::ShaderCompiler
             ComPtr<IDxcResult> result;
 
             HRESULT hres = ctx.compiler->Compile(&buffer, args.data(), static_cast<UINT32>(args.size()),
-                                                 ctx.includeHandler.Get(), IID_PPV_ARGS(&result));
+                                                 getComPtr(ctx.includeHandler), IID_PPV_ARGS(&result));
             if (FAILED(hres))
             {
                 HRESULT compileStatus;

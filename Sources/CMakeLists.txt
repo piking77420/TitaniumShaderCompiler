@@ -14,6 +14,7 @@ target_include_directories(TitaniumShaderCompiler
         "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+# Vulkan SDK
 find_package(Vulkan REQUIRED)
 
 # DXC
@@ -22,6 +23,7 @@ find_path(DXC_INCLUDE_DIR
     HINTS
         "$ENV{VULKAN_SDK}/Include"
         "$ENV{VULKAN_SDK}/include"
+        "/opt/homebrew/include"
     REQUIRED
 )
 
@@ -30,30 +32,23 @@ find_library(DXC_LIBRARY
     HINTS
         "$ENV{VULKAN_SDK}/Lib"
         "$ENV{VULKAN_SDK}/lib"
+        "/opt/homebrew/lib"
     REQUIRED
 )
 
-find_file(DXC_DLL
-    NAMES dxcompiler.dll
-    PATHS "$ENV{VULKAN_SDK}/Bin"
-    NO_DEFAULT_PATH
-    REQUIRED
-)
-
-message(STATUS "DXC_DLL = ${DXC_DLL}")
-
+message(STATUS "DXC_INCLUDE_DIR = ${DXC_INCLUDE_DIR}")
+message(STATUS "DXC_LIBRARY     = ${DXC_LIBRARY}")
 
 if(NOT DXC_INCLUDE_DIR OR NOT DXC_LIBRARY)
     message(FATAL_ERROR "DXC compiler SDK not found")
 endif()
-
-## Spriv Cross
 
 target_include_directories(TitaniumShaderCompiler
     PRIVATE
         "${DXC_INCLUDE_DIR}"
 )
 
+# SPIRV-Cross
 target_link_libraries(TitaniumShaderCompiler
     PRIVATE
         "${DXC_LIBRARY}"

@@ -23,10 +23,8 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-if (WIN32)
-    set(TEST_SOURCES
-    window_test.cpp)
-endif()
+set(TEST_SOURCES
+    test.cpp)
 
 add_executable(
         ${PROJECT_NAME}
