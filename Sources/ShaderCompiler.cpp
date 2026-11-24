@@ -25,23 +25,23 @@ using ComPtr = CComPtr<T>;
 namespace Ti::ShaderCompiler
 {
     template<typename T>
-    T* getComPtr(const ComPtr<T>& ptr) 
+    T* getComPtr(const ComPtr<T>& ptr)
     {
-    #ifdef _WIN32
+#ifdef _WIN32
         return ptr.Get();
-    #else
-        return ptr.p;     // for WinAdapter
-    #endif
+#else
+        return ptr.p; // for WinAdapter
+#endif
     }
 
     template<typename T>
     T** getComPtrAddress(ComPtr<T>& ptr)
     {
-    #ifdef _WIN32
+#ifdef _WIN32
         return ptr.GetAddressOf();
-    #else
-        return &ptr;     // for WinAdapter
-    #endif
+#else
+        return &ptr; // for WinAdapter
+#endif
     }
 
     using namespace std::literals;
@@ -196,7 +196,7 @@ namespace Ti::ShaderCompiler
         for (const auto& shaderEntryPoint : getCodeInfo.entryPoints)
         {
             if (shaderEntryPoint.stage == ShaderStage::Geometry && getCodeInfo.apiTarget == ApiTarget::Msl)
-                return std::unexpected(GetCodeError::UnexpectedError); // there is no geometry stage in metal 
+                return std::unexpected(GetCodeError::UnexpectedError); // there is no geometry stage in metal
 
             args.resize(1);
             // EntryPoint
@@ -220,6 +220,16 @@ namespace Ti::ShaderCompiler
             {
                 args.emplace_back(L"-I");
                 args.emplace_back((*getCodeInfo.includePath).data());
+            }
+
+            // defines
+            if (!getCodeInfo.defines.empty())
+            {
+                for (const auto& define : getCodeInfo.defines)
+                {
+                    args.emplace_back(L"-D");
+                    args.emplace_back(define.data());
+                }
             }
 
             if (!AddApiArgument(getCodeInfo.apiTarget, args, shaderEntryPoint.stage))
@@ -275,7 +285,6 @@ namespace Ti::ShaderCompiler
                 {
                     entryPointsCodes.emplace_back(dataPtr, dataPtr + dataSize);
                 }
-                
             }
             else
             {
