@@ -85,7 +85,7 @@ namespace Ti::ShaderCompiler
 
             std::span<const ShaderEntryPoint> entryPoints;
 
-            MatrixConvention matrixConvention;
+            MatrixConvention matrixConvention = MatrixConvention::Row;
 
             OptimisationLevel optimisationLevel;
 
@@ -110,7 +110,7 @@ namespace Ti::ShaderCompiler
                 entryPoints = newEntryPoints;
                 return *this;
             }
-            
+
             GetCodeInfo& setMatrixConvention(MatrixConvention newMatrixConvention)
             {
                 matrixConvention = newMatrixConvention;
@@ -131,10 +131,9 @@ namespace Ti::ShaderCompiler
 
             GetCodeInfo& setDefines(const std::span<const std::wstring_view>& newDefines)
             {
-                 defines = newDefines;
+                defines = newDefines;
                 return *this;
             }
-
         };
         using CompileError = std::variant<GetCodeError, std::string>;
 
